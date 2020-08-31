@@ -2,7 +2,7 @@ defmodule BBLL.Draft do
 
   @player_data BBLL.Players.from_json()
 
-  def all_leagues, do: ["BBL1", "BBL2", "BBL3", "BBL4"]
+  def all_leagues, do: ["BBLL1", "BBLL2", "BBLL3", "BBLL4", "BBLL5"]
 
   def new_from_json(league_name) do
     league_name <> "_draftresults.json"

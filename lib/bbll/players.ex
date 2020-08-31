@@ -1,6 +1,6 @@
 defmodule BBLL.Players do
   def from_json do
-    ["data", "BBL_players.json"]
+    ["data", "BBLL_players.json"]
     |> Path.join()
     |> File.read!()
     |> Jason.decode!()
