@@ -23,7 +23,7 @@ defmodule BBLL.Analysis do
 
   def owners(player_id) when is_numeric_id(player_id) do
     @leagues_data
-    |> Enum.map(fn picks -> Enum.find(picks, %{owner: "Nobody"}, fn pick -> pick.player == player_id end) end)
+    |> Enum.map(fn picks -> Enum.find(picks, %{owner: "None"}, fn pick -> pick.player == player_id end) end)
     |> Enum.map(fn pick -> Map.get(pick, :owner) end)
   end
 
@@ -35,9 +35,15 @@ defmodule BBLL.Analysis do
 
   def draft_positions(player_id) when is_numeric_id(player_id) do
     @leagues_data
-    |> Enum.map(fn draft -> Enum.find(draft, -99, fn picks -> picks.player == player_id end) end)
-    |> Enum.reject(fn league -> league == -99 end)
-    |> Enum.map(fn pick -> {pick.owner, pick.overall, pick.round_and_pick} end)
+    |> Enum.map(fn draft -> Enum.find(draft, fn picks -> picks.player == player_id end) end)
+    |> Enum.with_index()
+    |> Enum.map(fn {pick, index} -> %{
+      owner: pick[:owner] || "None",
+      overall: pick[:overall] || "Not Drafted",
+      round_and_pick: pick[:round_and_pick] || "Not Drafted",
+      league: pick[:league] || ("BBLL" <> to_string(index + 1))
+      }
+    end)
   end
 
   def draft_positions(name), do: draft_positions(player_id(name))
@@ -46,7 +52,8 @@ defmodule BBLL.Analysis do
     draft_positions =
       player_id
       |> draft_positions()
-      |> Enum.map(fn position -> elem(position, 1) end)
+      |> Enum.reject(fn pick -> pick.owner == "None" end)
+      |> Enum.map(fn pick -> pick.overall end)
 
     Enum.sum(draft_positions)
     |> Kernel./(length(draft_positions))
@@ -57,7 +64,8 @@ defmodule BBLL.Analysis do
   def highest(player_id) when is_numeric_id(player_id) do
     player_id
     |> draft_positions()
-    |> Enum.map(fn position -> elem(position, 1) end)
+    |> Enum.reject(fn pick -> pick.owner == "None" end)
+    |> Enum.map(fn pick -> pick.overall end)
     |> Enum.min()
   end
 
@@ -66,7 +74,8 @@ defmodule BBLL.Analysis do
   def lowest(player_id) when is_numeric_id(player_id) do
     player_id
     |> draft_positions()
-    |> Enum.map(fn position -> elem(position, 1) end)
+    |> Enum.reject(fn pick -> pick.owner == "None" end)
+    |> Enum.map(fn pick -> pick.overall end)
     |> Enum.max()
   end
 
