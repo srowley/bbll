@@ -8,6 +8,7 @@ defmodule BBLL.Draft do
     league_name <> "_draftresults.json"
     |> BBLL.import()
     |> get_in(["draftResults", "draftUnit", "draftPick"])
+    |> Enum.reject(fn pick -> pick["player"] == "" end)
     |> Enum.map(fn pick -> Map.take(pick, ["franchise", "player", "pick", "round"]) end)
     |> Enum.map(&string_to_atom_keys/1)
     |> Enum.map(fn pick -> Map.put(pick, :overall, convert_to_overall(pick)) end)
